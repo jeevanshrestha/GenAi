@@ -16,9 +16,8 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 # Initialize WebDriver (update chromedriver path if needed)
 driver = webdriver.Chrome(options=chrome_options)
 
-# Dictionary to store results
-scraped_data = {}
-
+# List to store results
+scraped_data = []
 # Starting URL
 current_url = "https://chaidocs.vercel.app/youtube/getting-started/"
 
@@ -58,7 +57,13 @@ try:
         soup = BeautifulSoup(page_source, 'html.parser')
         main_content = soup.find('main') # Find the main content area
         # Store in dictionary
-        scraped_data[current_url] =   extract_structured_text(main_content)
+
+        heading = main_content.find('h1').get_text()
+        scraped_data.append({
+            'heading': heading,
+            'url': current_url,
+            'content': extract_structured_text(main_content)
+        })
         
         # Find next page link
         next_link = soup.find('a', {'rel': 'next', 'class': 'astro-apwlwm3s'})
@@ -69,21 +74,19 @@ try:
             print("No more pages found")
             current_url = None
 except Exception as e:
-    print(f"An error occurred: {e}")
-finally:
     with open("scraped_data.json", "w", encoding="utf-8") as f:
         json.dump(
-            [{"url": url, "content": content} for url, content in scraped_data.items()],
+            scraped_data,
             f,
             ensure_ascii=False,
             indent=2
         )
-    driver.quit()  # Ensure browser closes even if error occurs 
-
 # Print results
 print("\nScraped Data Summary:")
-for url, content in scraped_data.items():
-    print(f"- {url}: {len(content)} characters")
+for entry in scraped_data:
+    print(f"- {entry['url']}: {len(entry['content'])} characters")
 
+# Example: Access content for first URL
+# print(scraped_data[0]['content'][:500])
 # Example: Access content for first URL
 # print(scraped_data["https://chaidocs.vercel.app/youtube/getting-started/"][:500])
