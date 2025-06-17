@@ -62,6 +62,8 @@ async def  process_query(query: str):
     print(response, '\n\n')
     messages.append({"role": "assistant", "content": response})
 
+    return response
+
     
 async def load_data(filepath: str):   
     
