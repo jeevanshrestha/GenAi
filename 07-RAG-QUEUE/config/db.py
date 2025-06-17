@@ -43,16 +43,14 @@ class Vectors:
                 }
 
 
-async    def search_query(self, query: str):
+    async    def search_query(self, query: str,k=3):
         print("Query received", __name__)
         """Search Qdrant for similar chunks"""
-        vector_db = await QdrantVectorStore.from_existing_collection(
+        vector_db = QdrantVectorStore.from_existing_collection(
             url=self.qdrant_url,
             collection_name= collection_name,
             embedding=embedding_model
         )
-        results = vector_db.similarity_search(query, k=3)
-        for r in results:
-            print(f"Score: (approx), Text: {r.page_content[:100]}")
-            print("-" * 60)
+        results = vector_db.similarity_search(query, k=k)
+        return results
  

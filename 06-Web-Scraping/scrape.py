@@ -74,18 +74,12 @@ try:
             print("No more pages found")
             current_url = None
 except Exception as e:
-    with open("scraped_data.json", "w", encoding="utf-8") as f:
-        json.dump(
-            scraped_data,
-            f,
-            ensure_ascii=False,
-            indent=2
-        )
-# Print results
-print("\nScraped Data Summary:")
-for entry in scraped_data:
-    print(f"- {entry['url']}: {len(entry['content'])} characters")
+    print(e)
 
+# Write scraped data to JSON file
+with open('scraped_data.json', 'w', encoding='utf-8') as f:
+    json.dump(scraped_data, f, ensure_ascii=False, indent=2)
+ 
 # Example: Access content for first URL
 # print(scraped_data[0]['content'][:500])
 # Example: Access content for first URL

@@ -20,12 +20,7 @@ async def root():
         "message": "Hello World"}
  
 
- # Wrapper for RQ
-import asyncio 
-
-def run_async_query(query: str):
-    
-    return asyncio.run(process_query(query))
+ 
 
 @app.post("/chat" )
 async def chat( 
@@ -34,7 +29,7 @@ async def chat(
     """
     Endpoint description
     """
-    job = queue.enqueue(run_async_query, query)
+    job = queue.enqueue(process_query, query)
     return  {"status":"queued", "job_id": job.id, "timestamp": datetime.now().isoformat()}
 
  
