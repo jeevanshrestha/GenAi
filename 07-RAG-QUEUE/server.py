@@ -1,11 +1,10 @@
-from fastapi import FastAPI, Query, UploadFile, File 
+from fastapi import FastAPI, Query, UploadFile, File , Path
 from fastapi.responses import JSONResponse
 from config.worker import process_query, load_data
 from config.connection import queue
 from datetime import datetime
 import os
-import shutil 
-
+import shutil   
 
 app = FastAPI()
 UPLOAD_DIR = "uploaded_files"
@@ -20,12 +19,7 @@ async def root():
         "message": "Hello World"}
  
 
- # Wrapper for RQ
-import asyncio 
-
-def run_async_query(query: str):
-    
-    return asyncio.run(process_query(query))
+ 
 
 @app.post("/chat" )
 async def chat( 
@@ -34,10 +28,11 @@ async def chat(
     """
     Endpoint description
     """
-    job = queue.enqueue(run_async_query, query)
+    job = queue.enqueue(process_query, query)
     return  {"status":"queued", "job_id": job.id, "timestamp": datetime.now().isoformat()}
 
  
+
 @app.post("/uploadfile/")
 async def upload_file(file: UploadFile = File(...)):
     file_location = os.path.join(UPLOAD_DIR, file.filename)
@@ -50,4 +45,20 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "message": f"File saved to {file_location}"
     })
- 
+
+
+@app.get("/result/{job_id}")
+async def get_result(
+    job_id: str = Path(..., description="Job ID")
+):
+    job = queue.fetch_job(job_id)
+    if job is None:
+        return JSONResponse(
+            status_code=404,
+            content={"status": "error", "message": "Job not found"}
+        )
+    if job.is_finished:
+        result = job.return_value()
+    else:
+        result = None
+    return {"result": result, "status": job.get_status()}
