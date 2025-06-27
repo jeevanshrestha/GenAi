@@ -1,0 +1,10 @@
+[project]
+name = "08-langgraph"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=0.5.0",
+    "typing-extensions>=4.14.0",
+]
